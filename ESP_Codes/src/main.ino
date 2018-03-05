@@ -1,5 +1,9 @@
+#include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+
+
+
 
 // Update these with values suitable for your network.
 
@@ -17,16 +21,18 @@ int value = 0;
 
 void setup_wifi() {
 
-  /*WiFi.mode(WIFI_STA);
-  WiFi.disconnect();*/
-  delay(10);
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
   // We start by connecting to a WiFi network
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
 
   WiFi.begin(ssid, password);
-
+  int connRes = WiFi.waitForConnectResult();
+  Serial.print ( "connRes: " );
+  Serial.println ( connRes );
  /*while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -36,35 +42,36 @@ void setup_wifi() {
 
   Serial.println("");
   Serial.println("WiFi connected");
-  Serial.println("IP address: ");
+  //Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
-
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-    digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is acive low on the ESP-01)
-  } else {
-    digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
-  }
+  // Serial.print("Message arrived [");
+  // Serial.print(topic);
+  // Serial.print("] ");
+  // for (int i = 0; i < length; i++) {
+  //   Serial.print((char)payload[i]);
+  // }
+  // Serial.println();
+  //
+  // // Switch on the LED if an 1 was received as first character
+  // if ((char)payload[0] == '1') {
+  //   digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
+  //   // but actually the LED is on; this is because
+  //   // it is acive low on the ESP-01)
+  // } else {
+  //   digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
+  //}
 
 }
 
 void reconnect() {
 
-  /*while (WiFi.status() != WL_CONNECTED){
+  while (WiFi.status() != WL_CONNECTED){
+    Serial.println("Rec wifi");
     setup_wifi();
-  }*/
+  }
   // Loop until we're reconnected
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
@@ -91,7 +98,8 @@ void reconnect() {
 void setup() {
 
   Serial.begin(115200);
-  pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+  Serial.print ( "INICIO: " );
+  //pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
 
    setup_wifi();
 

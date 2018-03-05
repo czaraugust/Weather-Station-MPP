@@ -24,7 +24,7 @@ const byte STAT2 = 8;
 
 const byte WDIR = A0;
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
+int contador= 0;
 //Global Variables
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 long lastSecond; //The millis counter to see when a second rolls by
@@ -177,7 +177,7 @@ void loop()
         //Take a speed and direction reading every second for 2 minute average
         if(++seconds_2m > 119) seconds_2m = 0;
 
-        //Calc the wind speed and direction every second for 120 second to get 2 minute average
+        //Calc the fnd speed and direction every second for 120 second to get 2 minute average
         float currentSpeed = get_wind_speed();
         windspeedmph = currentSpeed*1.60934; //update global variable for windspeed when using the printWeather() function
         //float currentSpeed = random(5); //For testing
@@ -216,8 +216,8 @@ void loop()
 
         digitalWrite(STAT1, LOW); //Turn off stat LED
     }
-
-  delay(5000);
+//A CADA 1 MINUTO
+  delay(60000);
 
 
 }
@@ -413,31 +413,14 @@ void printWeather()
     Serial.println();
     Serial.print('@');
       Serial.print("|");
+        Serial.print(contador++);
+      Serial.print("|");
     // Serial.print("$,winddir=");
     Serial.print(winddir);
     Serial.print("|");
     //EM KM/H
     Serial.print(windspeedmph, 2);
     Serial.print("|");
-    // Serial.print(",windgustmph=");
-    /*Serial.print(windgustmph, 1);
-    Serial.print(" ");
-    // Serial.print(",windgustdir=");
-    Serial.print(windgustdir);
-    Serial.print(" ");
-    // Serial.print(",windspdmph_avg2m=");
-    Serial.print(windspdmph_avg2m, 1);
-    Serial.print(" ");
-    // Serial.print(",winddir_avg2m=");
-    Serial.print(winddir_avg2m);
-    Serial.print(" ");
-    // Serial.print(",windgustmph_10m=");
-    Serial.print(windgustmph_10m, 1);
-    Serial.print(" ");
-    // Serial.print(",windgustdir_10m=");
-    Serial.print(windgustdir_10m);
-    Serial.print(" ");*/
-    // Serial.print(",humidity=");
     Serial.print(humidity, 1);
     Serial.print("|");
     // Serial.print(",tempf=");
@@ -462,8 +445,6 @@ void printWeather()
     // Serial.print(",light_lvl=");
     Serial.print(light_lvl, 2);
     Serial.print("|");
-
-
     // Serial.print(",");
     // Serial.println("#");
     Serial.print(getTemp(sensorTemp1));
@@ -471,7 +452,11 @@ void printWeather()
 
     Serial.print(getTemp(sensorTemp2));
 
+    /*
 
+      @ | DIR_VENTO º | VEL_VENTO | UMIDADE | TEMPE | CHUVA_HR | CHUVA_DIA | PRESS | VOLT | CORRENTE | LUZ | TEMP1 | TEMP2
+
+    */
 
 
   //  Serial.print(" ");

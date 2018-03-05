@@ -6,7 +6,7 @@ read -p "$*"
 git add . && \
 git add -u && \
 echo "Aperte <ENTER> para COMMIT"
- read -p "$*"
+read -p "$*"
 git commit -m "$desc" && \
 echo "Aperte <ENTER> para PUSH"
 read -p "$*"
