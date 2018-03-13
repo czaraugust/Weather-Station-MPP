@@ -5,6 +5,7 @@
 #include <BH1750.h>
  #include<OneWire.h>
  #include <DallasTemperature.h>
+ #include "ACS712.h"
 
 
 MPL3115A2 myPressure; //Create an instance of the pressure sensor
@@ -78,7 +79,7 @@ int sensorTemp1 =24 ;
 int sensorTemp2 = 25;
 
 int pinBatteryVoltage = A8;
-int pinBatteryCurrent =A9;
+ACS712 sensor(ACS712_20A, A9);
 float vout = 0.0;
 float vin = 0.0;
 float R1 = 30000.0; //
@@ -142,7 +143,7 @@ void setup()
     myPressure.setModeBarometer(); // Measure pressure in Pascals from 20 to 110 kPa
     myPressure.setOversampleRate(7); // Set Oversample to the recommended 128
     myPressure.enableEventFlags(); // Enable all three pressure and temp event flags
-
+    sensor.setZeroPoint(15);
     //Configure the humidity sensor
     myHumidity.begin();
     lightMeter.begin();
@@ -310,7 +311,9 @@ void calcWeather()
     //Calc battery level
     batt_lvl = get_battery_level();
 
-    currentDC = getCurrent();
+
+    sensor.setZeroPoint(15);
+    currentDC = sensor.getCurrentDC();
 }
 
 //Returns the voltage of the light sensor based on the 3.3V rail
@@ -342,14 +345,6 @@ return vin;
 
 }
 
-float getCurrent()
-{
-    int ACSoffset = 2500;
-    double currentDCread = analogRead(pinBatteryCurrent);
-    double Voltage = (currentDCread / 1023.0) * 5000; // Gets you mV
-    return  ((Voltage - ACSoffset) / 66);
-
-}
 
 
 //Returns the instataneous wind speed
