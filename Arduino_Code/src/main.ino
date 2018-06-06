@@ -217,8 +217,8 @@ void loop()
 
         digitalWrite(STAT1, LOW); //Turn off stat LED
     }
-//A CADA 1 MINUTO
-  delay(60000);
+//A CADA 2 segundos
+  delay(2000);
 
 
 }
@@ -474,12 +474,12 @@ return -1000;
 
 if ( OneWire::crc8( addr, 7) != addr[7]) {
 Serial.println("CRC is not valid!");
-return -1000;
+return -1001;
 }
 
 if ( addr[0] != 0x10 && addr[0] != 0x28) {
 Serial.print("Device is not recognized");
-return -1000;
+return -1002;
 }
 
 ds.reset();
