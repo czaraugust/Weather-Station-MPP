@@ -79,7 +79,7 @@ int sensorTemp1 =24 ;
 int sensorTemp2 = 25;
 
 int pinBatteryVoltage = A8;
-ACS712 sensor(ACS712_20A, A9);
+ACS712 sensor(ACS712_30A, A9);
 float vout = 0.0;
 float vin = 0.0;
 float R1 = 30000.0; //
