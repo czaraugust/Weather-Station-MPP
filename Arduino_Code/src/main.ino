@@ -143,7 +143,7 @@ void setup()
     myPressure.setModeBarometer(); // Measure pressure in Pascals from 20 to 110 kPa
     myPressure.setOversampleRate(7); // Set Oversample to the recommended 128
     myPressure.enableEventFlags(); // Enable all three pressure and temp event flags
-    sensor.setZeroPoint(15);
+    sensor.setZeroPoint(510);
     //Configure the humidity sensor
     myHumidity.begin();
     lightMeter.begin();
@@ -312,7 +312,7 @@ void calcWeather()
     batt_lvl = get_battery_level();
 
 
-    sensor.setZeroPoint(15);
+    //sensor.setZeroPoint(510);
     currentDC = sensor.getCurrentDC();
 }
 
