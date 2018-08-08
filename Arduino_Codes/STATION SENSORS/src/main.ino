@@ -5,7 +5,7 @@
 #include <BH1750.h>
  #include<OneWire.h>
  #include <DallasTemperature.h>
- #include "ACS712.h"
+
 
 
 MPL3115A2 myPressure; //Create an instance of the pressure sensor
@@ -71,19 +71,12 @@ volatile float dailyrainin = 0; // [rain inches so far today in local time]
 float pressure = 0;
 //float dewptf; // [dewpoint F] - It's hard to calculate dewpoint locally, do this in the agent
 
-float batt_lvl = 0; //[analog value from 0 to 1023]
-float light_lvl = 0; //[analog value from 0 to 1023]
-float currentDC =0;
+
 
 int sensorTemp1 =24 ;
 int sensorTemp2 = 25;
 
-int pinBatteryVoltage = A8;
-ACS712 sensor(ACS712_30A, A9);
-float vout = 0.0;
-float vin = 0.0;
-float R1 = 30000.0; //
-float R2 = 7500.0; //
+
 int value = 0;
 
 
@@ -134,7 +127,6 @@ void setup()
     pinMode(RAIN, INPUT_PULLUP); // input from wind meters rain gauge sensor
 
 
-    pinMode(pinBatteryVoltage, INPUT);
 
 
 
@@ -143,7 +135,7 @@ void setup()
     myPressure.setModeBarometer(); // Measure pressure in Pascals from 20 to 110 kPa
     myPressure.setOversampleRate(7); // Set Oversample to the recommended 128
     myPressure.enableEventFlags(); // Enable all three pressure and temp event flags
-    sensor.setZeroPoint(510);
+
     //Configure the humidity sensor
     myHumidity.begin();
     lightMeter.begin();
@@ -217,8 +209,8 @@ void loop()
 
         digitalWrite(STAT1, LOW); //Turn off stat LED
     }
-//A CADA 2 segundos
-  delay(2000);
+//A CADA 1 segundo
+  delay(1000);
 
 
 }
@@ -306,44 +298,13 @@ void calcWeather()
     //Calc dewptf
 
     //Calc light level
-    light_lvl = get_light_level();
-
-    //Calc battery level
-    batt_lvl = get_battery_level();
-
-
-    //sensor.setZeroPoint(510);
-    currentDC = sensor.getCurrentDC();
-}
-
-//Returns the voltage of the light sensor based on the 3.3V rail
-//This allows us to ignore what VCC might be (an Arduino plugged into USB has VCC of 4.5 to 5.2V)
-float get_light_level()
-{
-  uint16_t lux = lightMeter.readLightLevel();
-
-
-
-  float rawVoltage = (float) lux;
-
-  return(rawVoltage);
-}
-
-//Returns the voltage of the raw pin based on the 3.3V rail
-//This allows us to ignore what VCC might be (an Arduino plugged into USB has VCC of 4.5 to 5.2V)
-//Battery level is connected to the RAW pin on Arduino and is fed through two 5% resistors:
-//3.9K on the high side (R1), and 1K on the low side (R2)
-float get_battery_level()
-{
-value = analogRead(pinBatteryVoltage);
-vout = (value * 5.0) / 1024.0; // see text
-vin = vout / (R2/(R1+R2));
-  //REGRESSÃO LINEAR FEITA PRA CORRIGIR O EFEITO DO SENSOR DE LUZ DA SHIELD
-//vin = ((1.566*vin) + 0.07800);
-return vin;
 
 
 }
+
+
+
+
 
 
 
@@ -407,9 +368,9 @@ void printWeather()
 
     Serial.println();
     Serial.print('@');
-      Serial.print("|");
-        Serial.print(contador++);
-      Serial.print("|");
+    Serial.print("|");
+    Serial.print(contador++);
+    Serial.print("|");
     // Serial.print("$,winddir=");
     Serial.print(winddir);
     Serial.print("|");
@@ -430,26 +391,14 @@ void printWeather()
     // Serial.print(",pressure=");
     Serial.print(pressure, 3);
     Serial.print("|");
-    // Serial.print(",batt_lvl=");
-    Serial.print(batt_lvl, 2);
-    Serial.print("|");
 
-
-    Serial.print(currentDC, 2);
-    Serial.print("|");
-    // Serial.print(",light_lvl=");
-    Serial.print(light_lvl, 2);
-    Serial.print("|");
-    // Serial.print(",");
-    // Serial.println("#");
     Serial.print(getTemp(sensorTemp1));
     Serial.print("|");
-
     Serial.print(getTemp(sensorTemp2));
-
+    Serial.print("|");
     /*
 
-      @ | DIR_VENTO º | VEL_VENTO | UMIDADE | TEMPE | CHUVA_HR | CHUVA_DIA | PRESS | VOLT | CORRENTE | LUZ | TEMP1 | TEMP2
+      @ | DIR_VENTO º | VEL_VENTO | UMIDADE | TEMPE | CHUVA_HR | CHUVA_DIA | PRESS | TEMP1 | TEMP2
 
     */
 
