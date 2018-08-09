@@ -1,6 +1,8 @@
 import paho.mqtt.client as mqtt
 import sys
 import time
+import csv
+csv.register_dialect('myDialect', delimiter='*', quoting=csv.QUOTE_NONE, escapechar = ' ', lineterminator = '\n' )
 
 Broker = "localhost"
 PortaBroker = 1883
@@ -13,10 +15,13 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
 	MensagemRecebida = str(msg.payload)
 	ts = time.localtime()
-	teste = time.strftime("%d-%m-%Y %H:%M:%S", ts) + " "+ MensagemRecebida.replace('b', '').replace('\'', '')
-	f = open('stationsensors.txt', 'a')
-	print(teste, file = f, flush=True)
-	f.close()
+	teste = time.strftime("%d-%m-%Y %H:%M:%S", ts) + " "+ MensagemRecebida.replace('b', '')
+	f = open('stationSensors.csv', 'a')
+	with f:
+		writer = csv.writer(f,dialect='myDialect')
+		writer.writerow(teste)
+
+	f.close()	
 	
 client = mqtt.Client()
 client.on_connect = on_connect

@@ -3,8 +3,8 @@
 #include "SparkFunMPL3115A2.h" //Pressure sensor - Search "SparkFun MPL3115" and install from Library Manager
 #include "SparkFunHTU21D.h" //Humidity sensor - Search "SparkFun HTU21D" and install from Library Manager
 #include <BH1750.h>
- #include<OneWire.h>
- #include <DallasTemperature.h>
+#include<OneWire.h>
+#include <DallasTemperature.h>
 
 
 
@@ -25,7 +25,7 @@ const byte STAT2 = 8;
 
 const byte WDIR = A0;
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-int contador= 0;
+unsigned long  contador= 0;
 //Global Variables
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 long lastSecond; //The millis counter to see when a second rolls by
@@ -72,9 +72,13 @@ float pressure = 0;
 //float dewptf; // [dewpoint F] - It's hard to calculate dewpoint locally, do this in the agent
 
 
+#define ONE_WIRE_BUS 24
+OneWire ourWire(ONE_WIRE_BUS);
 
-int sensorTemp1 =24 ;
-int sensorTemp2 = 25;
+/* Tell Dallas Temperature Library to use oneWire Library */
+DallasTemperature sensors(&ourWire);
+//int sensorTemp1 =24 ;
+//int sensorTemp2 = 25;
 
 
 int value = 0;
@@ -135,6 +139,7 @@ void setup()
     myPressure.setModeBarometer(); // Measure pressure in Pascals from 20 to 110 kPa
     myPressure.setOversampleRate(7); // Set Oversample to the recommended 128
     myPressure.enableEventFlags(); // Enable all three pressure and temp event flags
+    sensors.begin();
 
     //Configure the humidity sensor
     myHumidity.begin();
@@ -392,10 +397,17 @@ void printWeather()
     Serial.print(pressure, 3);
     Serial.print("|");
 
-    Serial.print(getTemp(sensorTemp1));
+
+    sensors.requestTemperatures();
+    sensors.getTempCByIndex(0);
+    Serial.print(sensors.getTempCByIndex(0));
+    //Serial.print(getTemp(sensorTemp2));
     Serial.print("|");
-    Serial.print(getTemp(sensorTemp2));
+
+    Serial.print(sensors.getTempCByIndex(1));
+    //Serial.print(getTemp(sensorTemp1));
     Serial.print("|");
+
     /*
 
       @ | DIR_VENTO º | VEL_VENTO | UMIDADE | TEMPE | CHUVA_HR | CHUVA_DIA | PRESS | TEMP1 | TEMP2
