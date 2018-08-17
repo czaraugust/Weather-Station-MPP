@@ -2,7 +2,7 @@
 #include <Wire.h> //I2C needed for sensors
 #include "SparkFunMPL3115A2.h" //Pressure sensor - Search "SparkFun MPL3115" and install from Library Manager
 #include "SparkFunHTU21D.h" //Humidity sensor - Search "SparkFun HTU21D" and install from Library Manager
-#include <BH1750.h>
+//#include <BH1750.h>
 #include<OneWire.h>
 #include <DallasTemperature.h>
 
@@ -10,7 +10,7 @@
 
 MPL3115A2 myPressure; //Create an instance of the pressure sensor
 HTU21D myHumidity; //Create an instance of the humidity sensor
-BH1750 lightMeter;
+//BH1750 lightMeter;
 //Hardware pin definitions
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // digital I/O pins
@@ -143,7 +143,7 @@ void setup()
 
     //Configure the humidity sensor
     myHumidity.begin();
-    lightMeter.begin();
+    //lightMeter.begin();
     seconds = 0;
     lastSecond = millis();
 
@@ -159,6 +159,7 @@ void setup()
 
 
     Serial.println("Weather Shield online!");
+    digitalWrite(STAT1, HIGH);
 
 }
 
@@ -166,11 +167,10 @@ void setup()
 void loop()
 {
     //Keep track of which minute it is
-  if(millis() - lastSecond >= 1000)
-    {
+  if(millis() - lastSecond >= 1000) {
         digitalWrite(STAT1, HIGH); //Blink stat LED
 
-    lastSecond += 1000;
+        lastSecond += 1000;
 
         //Take a speed and direction reading every second for 2 minute average
         if(++seconds_2m > 119) seconds_2m = 0;

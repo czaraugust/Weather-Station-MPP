@@ -11,7 +11,7 @@ const char* ssid = "EASY";
 const char* password = "tv123456";
 const char* mqtt_server = "192.168.0.168";
 const char* mainTopic = "station";
-//const uint16_t port = 50939;
+
 
 WiFiClient espClient;
 PubSubClient client(espClient);
