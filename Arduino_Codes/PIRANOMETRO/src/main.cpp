@@ -22,10 +22,15 @@ float factor = 0.0078125;
 
   int16_t results;
   results = ads.readADC_Differential_0_1();
+  
   float mv =results * factor;
-  float irradiancia = mv *(1.69/100);
-  Serial.print("DIFERENCIAL 0: ");
-  Serial.println(mv,10);
+
+  float irradiancia = mv *(1/(1.69/100));
+
+  Serial.print("TENSAO: ");
+  Serial.print(mv,10);
+  Serial.print("   IRRADIANCIA: ");
+  Serial.println(irradiancia);
   delay(1000);
 
 }

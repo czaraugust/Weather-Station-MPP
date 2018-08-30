@@ -4,11 +4,6 @@
 #include <ESP8266mDNS.h>
 #include <ArduinoOTA.h>
 
-
-
-
-// Update these with values suitable for your network.
-
 const char* ssid = "EASY";
 const char* password = "tv123456";
 const char* mqtt_server = "192.168.0.168";
@@ -26,15 +21,12 @@ void setup_wifi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
-  //WiFi.disconnect();
+
   delay(100);
   // We start by connecting to a WiFi network
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
-
-  //WiFi.begin(ssid, password);
-
 
   int connRes = WiFi.waitForConnectResult();
   Serial.print ( "connRes: " );
@@ -45,7 +37,7 @@ void setup_wifi() {
   ArduinoOTA.setHostname("station");
 
     // No authentication by default
-  ArduinoOTA.setPassword("admin");
+//  ArduinoOTA.setPassword("admin");
 
     // Password can be set with it's md5 value as well
     // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
@@ -88,20 +80,6 @@ void setup_wifi() {
     Serial.println(WiFi.localIP());
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -137,6 +115,12 @@ void reconnect() {
     }
   }
 }
+
+
+
+
+
+
 
 void setup() {
 
@@ -181,6 +165,7 @@ ArduinoOTA.handle();
           values += '|';
 
       client.publish(mainTopic, values.c_str());
+
 
 
       }
