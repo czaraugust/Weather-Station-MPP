@@ -5,12 +5,28 @@
 // ads.setGain(GAIN_EIGHT);      // 8x gain   +/- 0.512V  1 bit = 0.25mV   0.015625mV
 // ads.setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
 #include <Arduino.h>
+#include <WiFiClient.h>
 #include <SPI.h>
 #include <Wire.h>
 #include "SD.h"
 #include "RTClib.h"
 #include "FS.h"
 #include <Adafruit_ADS1015.h>
+#include <PubSubClient.h>
+//#include <ESP8266WiFi.h>
+//#include <ESP8266mDNS.h>
+#include <ArduinoOTA.h>
+
+
+const char* ssid = "EASY";
+const char* password = "tv123456";
+const char* mqtt_server = "192.168.0.168";
+const char* mainTopic = "transdutores";
+
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
 
 RTC_DS1307 rtc;
 int day;
@@ -28,9 +44,119 @@ const int chipSelect = 17;
 Adafruit_ADS1115 ads(0X48);  /* Use this for the 16-bit version */
 float_t factor = 0.18750000;
 
+
+int anterior =0;
+
+void setup_wifi() {
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+
+
+  delay(100);
+  // We start by connecting to a WiFi network
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  int connRes = WiFi.waitForConnectResult();
+  Serial.print ( "connRes: " );
+  Serial.println ( connRes );
+
+
+  // Hostname defaults to esp8266-[ChipID]
+  ArduinoOTA.setHostname("station");
+
+    // No authentication by default
+      //  ArduinoOTA.setPassword("admin");
+
+    // Password can be set with it's md5 value as well
+    // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+    // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
+    ArduinoOTA.onStart([]() {
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH) {
+        type = "sketch";
+      } else { // U_SPIFFS
+        type = "filesystem";
+      }
+
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      Serial.println("Start updating " + type);
+    });
+    ArduinoOTA.onEnd([]() {
+      Serial.println("\nEnd");
+    });
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    });
+    ArduinoOTA.onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) {
+        Serial.println("Auth Failed");
+      } else if (error == OTA_BEGIN_ERROR) {
+        Serial.println("Begin Failed");
+      } else if (error == OTA_CONNECT_ERROR) {
+        Serial.println("Connect Failed");
+      } else if (error == OTA_RECEIVE_ERROR) {
+        Serial.println("Receive Failed");
+      } else if (error == OTA_END_ERROR) {
+        Serial.println("End Failed");
+      }
+    });
+    ArduinoOTA.begin();
+    Serial.println("Ready");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+
+
+}
+
+void reconnect() {
+
+  if (WiFi.status() != WL_CONNECTED){
+    Serial.println("Rec wifi");
+    //ESP.restart();
+    setup_wifi();
+  }
+  else{
+    Serial.println("WIFI OK!");
+  }
+  // Loop until we're reconnected
+  if (!client.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Create a random client ID
+    String clientId = "ESP8266Client-";
+    //clientId += String(WiFi.macAddress(), HEX);
+    // Attempt to connect
+    if (client.connect(clientId.c_str())) {
+      Serial.println("connected");
+      // Once connected, publish an announcement...
+      client.publish(mainTopic, "HI!");
+      // ... and resubscribe
+      client.subscribe("devicesub");
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 mseconds");
+      // Wait 5 seconds before retrying
+      //delay(100);
+    }
+  }
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+
+}
+
+
+
+
+DateTime now = rtc.now();
 String getTime() {
   String time = "";
-  DateTime now = rtc.now();
+   now = rtc.now();
   day = now.day();
   month = now.month();
   year = now.year();
@@ -142,7 +268,7 @@ void writeFile(fs::FS &fs, const char * path, const char * message){
 }
 
 void appendFile(fs::FS &fs, const char * path, const char * message){
-    Serial.printf("Appending to file: %s\n", path);
+    //Serial.printf("Appending to file: %s\n", path);
 
     File file = fs.open(path, FILE_APPEND);
     if(!file){
@@ -150,7 +276,7 @@ void appendFile(fs::FS &fs, const char * path, const char * message){
         return;
     }
     if(file.print(message)){
-        Serial.println("Message appended");
+        //Serial.println("Message appended");
     } else {
         Serial.println("Append failed");
     }
@@ -216,10 +342,11 @@ void testFileIO(fs::FS &fs, const char * path){
     Serial.printf("%u bytes written for %u ms\n", 2048 * 512, end);
     file.close();
 }
-
+float_t tensao =   0;
+float_t corrente = 0;
 String getData(){
-  float_t tensao =   ads.readADC_Differential_0_1() *factor/1000.0000;
-  float_t corrente = ads.readADC_Differential_2_3() *factor/1000.0000;
+  tensao =   ads.readADC_Differential_0_1() *factor/1000.0000;
+   corrente = ads.readADC_Differential_2_3() *factor/1000.0000;
 
   String data = getTime();
 
@@ -236,6 +363,12 @@ String getData(){
 void setup() {
    Serial.begin(115200);
    //pinMode(SS, OUTPUT);
+
+   setup_wifi();
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(callback);
+  delay(1000);
+
    ads.setGain(GAIN_TWOTHIRDS);
    ads.begin();
       // rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
@@ -278,7 +411,7 @@ void setup() {
 
 
       String data = getData();
-      String path = "/";
+      String path = "/TRANSDUTORES/";
       path += day;
       path += "_";
       path += month;
@@ -287,26 +420,39 @@ void setup() {
       path += ".csv";
 
       writeFile(SD, path.c_str(), "DIA/MES/ANO HORA:MINUTO:SEGUNDO |  TENSÃO | CORRENTE \n");
+      anterior = seconds;
 
  }
 
 void loop(){
+//  ArduinoOTA.handle();
+//   if (!client.connected()) {
+//     Serial.println(client.state());
+//       reconnect();
+//   }
+// client.loop();
+
+
 String data = getData();
-String path = "/";
-path += day;
-path += "_";
-path += month;
-path += "_";
-path += year;
-path += ".csv";
 
-if (hour ==0 && minutes == 0 && seconds == 0 ){
-  writeFile(SD, path.c_str(), "DIA/MES/ANO HORA:MINUTO:SEGUNDO |  TENSÃO | CORRENTE \n");
+if (seconds !=  anterior){
+
+
+    anterior = seconds;
+    String path = "/TRANSDUTORES/";
+    path += day;
+    path += "_";
+    path += month;
+    path += "_";
+    path += year;
+    path += ".csv";
+
+    if (hour ==0 && minutes == 0 && seconds == 0 ){
+      writeFile(SD, path.c_str(), "DIA/MES/ANO HORA:MINUTO:SEGUNDO |  TENSÃO | CORRENTE \n");
+    }
+    appendFile(SD, path.c_str(), data.c_str());
+    //client.publish(mainTopic, data.c_str());
+
+    Serial.println(data);
+  }
 }
-appendFile(SD, path.c_str(), data.c_str());
-
-delay(1000);
-
-
-
- }

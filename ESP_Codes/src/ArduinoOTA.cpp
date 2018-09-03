@@ -253,7 +253,7 @@ void ArduinoOTAClass::_runUpdate() {
     if (_error_callback) {
       _error_callback(OTA_BEGIN_ERROR);
     }
-    
+
     StreamString ss;
     Update.printError(ss);
     _udp_ota->append("ERR: ", 5);
@@ -269,7 +269,7 @@ void ArduinoOTAClass::_runUpdate() {
   delay(100);
 
   Update.setMD5(_md5.c_str());
-  WiFiUDP::stopAll();
+  //WiFiUDP::stopAll();
   WiFiClient::stopAll();
 
   if (_start_callback) {
