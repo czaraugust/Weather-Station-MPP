@@ -1,6 +1,10 @@
 #include <Wire.h> //I2C needed for sensors
 #include<Station.h>
-Station station;
+#define ONE_WIRE_BUS 24
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+Station station(sensors);
+
 void isrRain(){
   station.rainIRQ();
 }
@@ -17,13 +21,16 @@ void setup(){
   station.setupStation();
   attachInterrupt(0, isrRain , FALLING);
   attachInterrupt(1, isrSpeed , FALLING);
-  Serial.println(station.ONE_WIRE_BUS);
+
   // turn on interrupts
   interrupts();
 
 }
 
 void loop() {
+
+    station.loopStation();
+    delay(1000);
 
 }
 // //

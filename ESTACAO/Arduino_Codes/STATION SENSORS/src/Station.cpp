@@ -1,6 +1,6 @@
 #include "Station.h"
 
-Station::Station(){
+Station::Station(DallasTemperature sensors){
   this->raintime=0;
   this->dailyrainin =0;
   this->WIND_DIR_AVG_SIZE =120;
@@ -25,8 +25,13 @@ Station::Station(){
   this->tempf =0;
   this->rainin =0;
   this->pressure =0;
-  // OneWire ourWire(ONE_WIRE_BUS);
-  // DallasTemperature sensors(&ourWire);
+  this->sensors = sensors;
+
+  // OneWire ourWire(24);
+  //this->ourWire = OneWire ourWires(24);
+  // DallasTemperature sensores(&oneWire);
+  //
+  // this->sensors = sensores(&ourWire);
 
 
 
@@ -182,6 +187,7 @@ void Station::loopStation(){
         }
 
       }
+      printWeather();
 }
 
 void Station::calcWeather()
@@ -261,7 +267,7 @@ void Station::calcWeather()
         rainin += rainHour[i];
 
     //Calc pressure
-    pressure = myPressure.readPressure()/1000;
+    pressure = myPressure.readPressure()/100;
 
     //Calc dewptf
 

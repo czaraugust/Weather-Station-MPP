@@ -11,7 +11,7 @@
 
 class Station{
 public:
-  Station();
+  Station(DallasTemperature sensors);
   MPL3115A2 myPressure;
   HTU21D myHumidity;
   void rainIRQ();
@@ -57,8 +57,7 @@ public:
   float rainin;
   volatile float dailyrainin;
   float pressure;
-  OneWire ourWire(24);
-  DallasTemperature sensors(&ourWire);
+  DallasTemperature sensors;
 
 
 
