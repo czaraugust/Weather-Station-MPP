@@ -187,7 +187,7 @@ void Station::loopStation(){
         }
 
       }
-      printWeather();
+      //printWeather();
 }
 
 void Station::calcWeather()
@@ -305,7 +305,7 @@ ds.reset();
 ds.select(addr);
 ds.write(0x44,1);
 
-byte present = ds.reset();
+//byte present = ds.reset();
 ds.select(addr);
 ds.write(0xBE);
 
@@ -328,45 +328,72 @@ return Temperature;
 
 
 
-void Station::printWeather()
+String Station::printWeather()
 {
     calcWeather(); //Go calc all the various sensors
-
-    Serial.println();
-    Serial.print('@');
-
-    Serial.print("|");
-    // Serial.print("$,winddir=");
-    Serial.print(winddir);
-    Serial.print("|");
-    //EM KM/H
-    Serial.print(windspeedmph, 2);
-    Serial.print("|");
-    Serial.print(humidity, 1);
-    Serial.print("|");
-    // Serial.print(",tempf=");
-    Serial.print(tempf, 1);
-    Serial.print("|");
-    // Serial.print(",rainin=");
-    Serial.print(rainin, 2);
-    Serial.print("|");
-    // Serial.print(",dailyrainin=");
-    Serial.print(dailyrainin, 2);
-    Serial.print("|");
-    // Serial.print(",pressure=");
-    Serial.print(pressure, 3);
-    Serial.print("|");
-
-
     sensors.requestTemperatures();
-    sensors.getTempCByIndex(0);
-    Serial.print(sensors.getTempCByIndex(0));
-    //Serial.print(getTemp(sensorTemp2));
-    Serial.print("|");
+    String sensor1 = String(sensors.getTempCByIndex(0));
+    String sensor2 = String(sensors.getTempCByIndex(1));
+    String data = "|";
 
-    Serial.print(sensors.getTempCByIndex(1));
-    //Serial.print(getTemp(sensorTemp1));
-    Serial.print("|");
+    data += String(winddir);
+    data += "|";
+    data += String (windspeedmph, 2);
+    data +=  "|";
+    data += String(humidity, 2);
+    data += "|";
+    data += String (tempf, 2);
+    data += "|";
+    data += String(rainin,2);
+    data += "|";
+    data += String(dailyrainin,2);
+    data += "|";
+
+    data += String (pressure, 4);
+    data += "|";
+    data += sensor1;
+    data += "|";
+    data += sensor2;
+    data += "|";
+  //  Serial.println(data);
+
+
+
+
+    // Serial.println();
+    // Serial.print('@');
+    //
+    // Serial.print("|");
+    // // Serial.print("$,winddir=");
+    // Serial.print(winddir);
+    // Serial.print("|");
+    // //EM KM/H
+    // Serial.print(windspeedmph, 2);
+    // Serial.print("|");
+    // Serial.print(humidity, 2);
+    // Serial.print("|");
+    // // Serial.print(",tempf=");
+    // Serial.print(tempf, 2);
+    // Serial.print("|");
+    // // Serial.print(",rainin=");
+    // Serial.print(rainin, 2);
+    // Serial.print("|");
+    // // Serial.print(",dailyrainin=");
+    // Serial.print(dailyrainin, 2);
+    // Serial.print("|");
+    // // Serial.print(",pressure=");
+    // Serial.print(pressure, 4);
+    // Serial.print("|");
+    //
+    //
+    //
+    // Serial.print(sensors.getTempCByIndex(0));
+    // //Serial.print(getTemp(sensorTemp2));
+    // Serial.print("|");
+    //
+    // Serial.print(sensors.getTempCByIndex(1));
+    // //Serial.print(getTemp(sensorTemp1));
+    // Serial.print("|");
 
     /*
 
@@ -375,6 +402,7 @@ void Station::printWeather()
     */
 
 
-  //  Serial.print(" ");
+  //Serial.println(data);
+  return data;
 
   }

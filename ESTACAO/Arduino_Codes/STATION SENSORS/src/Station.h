@@ -22,7 +22,7 @@ public:
   int get_wind_direction();
   void calcWeather();
   float getTemp(int sensor);
-  void printWeather();
+  String printWeather();
 
   int WIND_DIR_AVG_SIZE,ONE_WIRE_BUS;
   volatile unsigned long raintime, rainlast, raininterval, rain, lastWindIRQ;
