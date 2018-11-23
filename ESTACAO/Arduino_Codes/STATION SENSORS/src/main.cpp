@@ -4,6 +4,10 @@
 #include <RTClib.h>
 #include <SPI.h>
 #include <SD.h>
+Sd2Card card;
+SdVolume volume;
+SdFile root;
+
 #include <Adafruit_ADS1015.h>
 #define ONE_WIRE_BUS 24
 OneWire oneWire(ONE_WIRE_BUS);
@@ -14,9 +18,9 @@ Station station(sensors);
 Adafruit_ADS1115 ads(0X48);  /* Use this for the 16-bit version */
 float factor = 0.0078125;
 
-const int chipSelect = 4;
+const int chipSelect = 53;
 
-File dataFile;
+
 
 int anterior =0;
 int minutoanterior = 0;
@@ -106,37 +110,76 @@ void setup(){
     if (rtc.isrunning()) { //SE RTC NÃO ESTIVER SENDO EXECUTADO, FAZ
       Serial.println("DS1307 rodando!"); //IMPRIME O TEXTO NO MONITOR SERIAL
       //REMOVA O COMENTÁRIO DE UMA DAS LINHAS ABAIXO PARA INSERIR AS INFORMAÇÕES ATUALIZADAS EM SEU RTC
-      //rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); //CAPTURA A DATA E HORA EM QUE O SKETCH É COMPILADO
+    //  rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); //CAPTURA A DATA E HORA EM QUE O SKETCH É COMPILADO
       //rtc.adjust(DateTime(2018, 8, 29, 17, 35, 00)); //(ANO), (MÊS), (DIA), (HORA), (MINUTOS), (SEGUNDOS)
     }
-    pinMode(SS, OUTPUT);
-    if (!SD.begin(52)) {
-      Serial.println("Card failed, or not present");
-      // don't do anything more:
-      while (1) ;
-    }
+
+    if (!card.init(SPI_HALF_SPEED, chipSelect)) {
+       Serial.println("initialization failed. Things to check:");
+       return;
+     } else {
+       Serial.println("Wiring is correct and a card is present.");
+     }
+
+     // print the type of card
+     Serial.print("\nCard type: ");
+     switch (card.type()) {
+       case SD_CARD_TYPE_SD1:
+         Serial.println("SD1");
+         break;
+       case SD_CARD_TYPE_SD2:
+         Serial.println("SD2");
+         break;
+       case SD_CARD_TYPE_SDHC:
+         Serial.println("SDHC");
+         break;
+       default:
+         Serial.println("Unknown");
+     }
+
+     if (!SD.begin(chipSelect)) {
+        Serial.println("Card failed, or not present");
+          // don't do anything more:
+          return;
+      }
+      else{
+      Serial.println("card initialized.");
+      }
+
+
+
     getTime();
     String path = "";
     path += day;
     path += "_";
     path += month;
-    // path += "_";
-    // path += year;
     path += ".csv";
-    dataFile = SD.open(path, FILE_WRITE);
+    File dataFile = SD.open(path, FILE_WRITE);
+    Serial.println(path);
+    Serial.print(dataFile);
+     if (dataFile) {
+       Serial.println("PASSOU!");
+
+     }
+     else{
+       Serial.println("PASSOU!");
+
+     }
+
     dataFile.println("DIA/MES/ANO HORA:MINUTO:SEGUNDO|DIR VENTO|VEL VENTO|UMIDADE|TEMP AMB|CHUVA HR|CHUVA DIA|PRESSAO|TEMP PAINEL 1| TEMP PAINEL 2|IRRADIANCIA");
-    dataFile.flush();
+
     dataFile.close();
     anterior = seconds;
     minutoanterior = minutes;
 }
-
+long int contador =0;
 void loop() {
 
-  station.loopStation();
+  //station.loopStation();
   getTime();
+  //String data =getData();
   if (seconds !=  anterior){
-    String data =getData();
+  String data =getData();
 
     anterior = seconds;
 
@@ -146,11 +189,11 @@ void loop() {
     path += "_";
     path += month;
     path += ".csv";
-    dataFile = SD.open(path, FILE_WRITE);
+    File dataFile = SD.open(path, FILE_WRITE);
     dataFile.println(data);
-    dataFile.flush();
     dataFile.close();
-    Serial.println(data);Serial.println(" ");
+    contador++;
+    Serial.print(contador); Serial.print(" "); Serial.println(data);Serial.println(" ");
 
 
 

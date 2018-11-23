@@ -143,52 +143,52 @@ int Station::get_wind_direction()
 }
 
 
-void Station::loopStation(){
-  if(millis() - lastSecond >= 1000) {
-        digitalWrite(STAT1, HIGH); //Blink stat LED
-
-        lastSecond += 1000;
-
-        //Take a speed and direction reading every second for 2 minute average
-        if(++seconds_2m > 119) seconds_2m = 0;
-
-        //Calc the fnd speed and direction every second for 120 second to get 2 minute average
-        float currentSpeed = get_wind_speed();
-        windspeedmph = currentSpeed*1.60934; //update global variable for windspeed when using the printWeather() function
-        //float currentSpeed = random(5); //For testing
-        int currentDirection = get_wind_direction();
-        windspdavg[seconds_2m] = (int)currentSpeed;
-        winddiravg[seconds_2m] = currentDirection;
-        //if(seconds_2m % 10 == 0) displayArrays(); //For testing
-
-        //Check to see if this is a gust for the minute
-        if(currentSpeed > windgust_10m[minutes_10m])
-        {
-            windgust_10m[minutes_10m] = currentSpeed;
-            windgustdirection_10m[minutes_10m] = currentDirection;
-        }
-
-        //Check to see if this is a gust for the day
-        if(currentSpeed > windgustmph)
-        {
-            windgustmph = currentSpeed;
-            windgustdir = currentDirection;
-        }
-
-        if(++seconds > 59)
-        {
-            seconds = 0;
-
-            if(++minutes > 59) minutes = 0;
-            if(++minutes_10m > 9) minutes_10m = 0;
-
-            rainHour[minutes] = 0; //Zero out this minute's rainfall amount
-            windgust_10m[minutes_10m] = 0; //Zero out this minute's gust
-        }
-
-      }
-      //printWeather();
-}
+// void Station::loopStation(){
+//   if(millis() - lastSecond >= 1000) {
+//         digitalWrite(STAT1, HIGH); //Blink stat LED
+//
+//         lastSecond += 1000;
+//
+//         //Take a speed and direction reading every second for 2 minute average
+//         if(++seconds_2m > 119) seconds_2m = 0;
+//
+//         //Calc the fnd speed and direction every second for 120 second to get 2 minute average
+//         float currentSpeed = get_wind_speed();
+//         windspeedmph = currentSpeed*1.60934; //update global variable for windspeed when using the printWeather() function
+//         //float currentSpeed = random(5); //For testing
+//         int currentDirection = get_wind_direction();
+//         windspdavg[seconds_2m] = (int)currentSpeed;
+//         winddiravg[seconds_2m] = currentDirection;
+//         //if(seconds_2m % 10 == 0) displayArrays(); //For testing
+//
+//         //Check to see if this is a gust for the minute
+//         if(currentSpeed > windgust_10m[minutes_10m])
+//         {
+//             windgust_10m[minutes_10m] = currentSpeed;
+//             windgustdirection_10m[minutes_10m] = currentDirection;
+//         }
+//
+//         //Check to see if this is a gust for the day
+//         if(currentSpeed > windgustmph)
+//         {
+//             windgustmph = currentSpeed;
+//             windgustdir = currentDirection;
+//         }
+//
+//         if(++seconds > 59)
+//         {
+//             seconds = 0;
+//
+//             if(++minutes > 59) minutes = 0;
+//             if(++minutes_10m > 9) minutes_10m = 0;
+//
+//             rainHour[minutes] = 0; //Zero out this minute's rainfall amount
+//             windgust_10m[minutes_10m] = 0; //Zero out this minute's gust
+//         }
+//
+//       }
+//       //printWeather();
+// }
 
 void Station::calcWeather()
 {
@@ -196,58 +196,58 @@ void Station::calcWeather()
     winddir = get_wind_direction();
 
     //Calc windspeed
-    //windspeedmph = get_wind_speed(); //This is calculated in the main loop on line 179
+    windspeedmph = get_wind_speed(); //This is calculated in the main loop on line 179
 
-    //Calc windgustmph
-    //Calc windgustdir
-    //These are calculated in the main loop
-
-    //Calc windspdmph_avg2m
-    float temp = 0;
-    for(int i = 0 ; i < 120 ; i++)
-        temp += windspdavg[i];
-    temp /= 120.0;
-    windspdmph_avg2m = temp;
-
-    //Calc winddir_avg2m, Wind Direction
-    //You can't just take the average. Google "mean of circular quantities" for more info
-    //We will use the Mitsuta method because it doesn't require trig functions
-    //And because it sounds cool.
-    //Based on: http://abelian.org/vlf/bearings.html
-    //Based on: http://stackoverflow.com/questions/1813483/averaging-angles-again
-    long sum = winddiravg[0];
-    int D = winddiravg[0];
-    for(int i = 1 ; i < WIND_DIR_AVG_SIZE ; i++)
-    {
-        int delta = winddiravg[i] - D;
-
-        if(delta < -180)
-            D += delta + 360;
-        else if(delta > 180)
-            D += delta - 360;
-        else
-            D += delta;
-
-        sum += D;
-    }
-    winddir_avg2m = sum / WIND_DIR_AVG_SIZE;
-    if(winddir_avg2m >= 360) winddir_avg2m -= 360;
-    if(winddir_avg2m < 0) winddir_avg2m += 360;
-
-    //Calc windgustmph_10m
-    //Calc windgustdir_10m
-    //Find the largest windgust in the last 10 minutes
-    windgustmph_10m = 0;
-    windgustdir_10m = 0;
-    //Step through the 10 minutes
-    for(int i = 0; i < 10 ; i++)
-    {
-        if(windgust_10m[i] > windgustmph_10m)
-        {
-            windgustmph_10m = windgust_10m[i];
-            windgustdir_10m = windgustdirection_10m[i];
-        }
-    }
+    // //Calc windgustmph
+    // //Calc windgustdir
+    // //These are calculated in the main loop
+    //
+    // //Calc windspdmph_avg2m
+    // float temp = 0;
+    // for(int i = 0 ; i < 120 ; i++)
+    //     temp += windspdavg[i];
+    // temp /= 120.0;
+    // windspdmph_avg2m = temp;
+    //
+    // //Calc winddir_avg2m, Wind Direction
+    // //You can't just take the average. Google "mean of circular quantities" for more info
+    // //We will use the Mitsuta method because it doesn't require trig functions
+    // //And because it sounds cool.
+    // //Based on: http://abelian.org/vlf/bearings.html
+    // //Based on: http://stackoverflow.com/questions/1813483/averaging-angles-again
+    // long sum = winddiravg[0];
+    // int D = winddiravg[0];
+    // for(int i = 1 ; i < WIND_DIR_AVG_SIZE ; i++)
+    // {
+    //     int delta = winddiravg[i] - D;
+    //
+    //     if(delta < -180)
+    //         D += delta + 360;
+    //     else if(delta > 180)
+    //         D += delta - 360;
+    //     else
+    //         D += delta;
+    //
+    //     sum += D;
+    // }
+    // winddir_avg2m = sum / WIND_DIR_AVG_SIZE;
+    // if(winddir_avg2m >= 360) winddir_avg2m -= 360;
+    // if(winddir_avg2m < 0) winddir_avg2m += 360;
+    //
+    // //Calc windgustmph_10m
+    // //Calc windgustdir_10m
+    // //Find the largest windgust in the last 10 minutes
+    // windgustmph_10m = 0;
+    // windgustdir_10m = 0;
+    // //Step through the 10 minutes
+    // for(int i = 0; i < 10 ; i++)
+    // {
+    //     if(windgust_10m[i] > windgustmph_10m)
+    //     {
+    //         windgustmph_10m = windgust_10m[i];
+    //         windgustdir_10m = windgustdirection_10m[i];
+    //     }
+    // }
 
     //Calc humidity
     humidity = myHumidity.readHumidity();
@@ -348,7 +348,6 @@ String Station::printWeather()
     data += "|";
     data += String(dailyrainin,2);
     data += "|";
-
     data += String (pressure, 4);
     data += "|";
     data += sensor1;
