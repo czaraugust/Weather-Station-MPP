@@ -6,25 +6,25 @@
 // ads.setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
 #include <Arduino.h>
 //#include <WiFiClient.h>
-#include <SPI.h>
 #include <Wire.h>
-#include "SD.h"
-#include "RTClib.h"
-#include "FS.h"
+#include <RTClib.h>
+#include <SPI.h>
+//#include "FS.h"
+#include <SPI.h>
+#include <SD.h> //INSTALL 161
+
+
 #include <Adafruit_ADS1015.h>
-#include "WiFI.h"
-#include <PubSubClient.h>
+
+// const char* ssid = "EASY_CISCO";
+// const char* password = "tv123456";
+// //const char* mqtt_server = "test.mosquitto.org";
+// const char* mqtt_server = "192.168.0.100";
+// const char* mainTopic = "transdutores";
 
 
-const char* ssid = "EASY_CISCO";
-const char* password = "tv123456";
-//const char* mqtt_server = "test.mosquitto.org";
-const char* mqtt_server = "192.168.0.100";
-const char* mainTopic = "transdutores";
-
-
-WiFiClient espClient;
-PubSubClient client(espClient);
+//WiFiClient espClient;
+//PubSubClient client(espClient);
 
 
 RTC_DS1307 rtc;
@@ -47,69 +47,69 @@ float_t factor = 0.18750;
 int anterior =0;
 int minutoanterior = 0;
 
-void setup_wifi() {
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  delay(100);
-
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      Serial.print(".");
-  }
-
-
-  // We start by connecting to a WiFi network
-
-
-  int connRes = WiFi.waitForConnectResult();
-  Serial.print ( "connRes: " );
-  Serial.println ( connRes );
-    Serial.println("Ready");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-
-
-}
-
-void callback(char* topic, byte* payload, unsigned int length) {
-
-}
-
-void reconnect() {
-
-  if (WiFi.status() != WL_CONNECTED){
-    Serial.println("Rec wifi");
-    //ESP.restart();
-    setup_wifi();
-  }
-  else{
-    Serial.println("WIFI OK!");
-  }
-  // Loop until we're reconnected
-  if (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
-    // Create a random client ID
-    String clientId = "ESP32";
-    //clientId += String(WiFi.macAddress(), HEX);
-    // Attempt to connect
-    if (client.connect(clientId.c_str())) {
-      Serial.println("connected");
-      // Once connected, publish an announcement...
-      client.publish(mainTopic, "HI!");
-      // ... and resubscribe
-      client.subscribe("devicesub");
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 mseconds");
-      // Wait 5 seconds before retrying
-      //delay(100);
-    }
-  }
-}
+// void setup_wifi() {
+//   Serial.println();
+//   Serial.print("Connecting to ");
+//   Serial.println(ssid);
+//   delay(100);
+//
+//   WiFi.mode(WIFI_STA);
+//   WiFi.begin(ssid, password);
+//   while (WiFi.status() != WL_CONNECTED) {
+//       delay(500);
+//       Serial.print(".");
+//   }
+//
+//
+//   // We start by connecting to a WiFi network
+//
+//
+//   int connRes = WiFi.waitForConnectResult();
+//   Serial.print ( "connRes: " );
+//   Serial.println ( connRes );
+//     Serial.println("Ready");
+//     Serial.print("IP address: ");
+//     Serial.println(WiFi.localIP());
+//
+//
+// }
+//
+// void callback(char* topic, byte* payload, unsigned int length) {
+//
+// }
+//
+// void reconnect() {
+//
+//   if (WiFi.status() != WL_CONNECTED){
+//     Serial.println("Rec wifi");
+//     //ESP.restart();
+//     setup_wifi();
+//   }
+//   else{
+//     Serial.println("WIFI OK!");
+//   }
+//   // Loop until we're reconnected
+//   if (!client.connected()) {
+//     Serial.print("Attempting MQTT connection...");
+//     // Create a random client ID
+//     String clientId = "ESP32";
+//     //clientId += String(WiFi.macAddress(), HEX);
+//     // Attempt to connect
+//     if (client.connect(clientId.c_str())) {
+//       Serial.println("connected");
+//       // Once connected, publish an announcement...
+//       client.publish(mainTopic, "HI!");
+//       // ... and resubscribe
+//       client.subscribe("devicesub");
+//     } else {
+//       Serial.print("failed, rc=");
+//       Serial.print(client.state());
+//       Serial.println(" try again in 5 mseconds");
+//       // Wait 5 seconds before retrying
+//       //delay(100);
+//     }
+//   }
+// }
 
 
 
@@ -119,7 +119,7 @@ void reconnect() {
 DateTime now = rtc.now();
 String getTime() {
   String time = "";
-   now = rtc.now();
+  now = rtc.now();
   day = now.day();
   month = now.month();
   year = now.year();
@@ -130,13 +130,13 @@ String getTime() {
   seconds = now.second();
 
 
-  time = day;
-  time += "/";
-  time +=month;
-  time += "/";
-  time += year;
-  time += "/";
-  time += " ";
+  // time = day;
+  // time += "/";
+  // time +=month;
+  // time += "/";
+  // time += year;
+  // time += "/";
+  // time += " ";
   time += hour;
   time += ":";
   time += minutes;
@@ -311,7 +311,7 @@ void testFileIO(fs::FS &fs, const char * path){
 
 
 String getData(){
-String  tensao =   String(ads.readADC_Differential_0_1() * 50.00000*factor/1000.00000,5);
+String  tensao =   String(ads.readADC_Differential_0_1() * 200.00000*factor/1000.00000,5);
 String corrente = String(ads.readADC_Differential_2_3() * 2.00000*factor/1000.00000,5);
 
 
@@ -330,17 +330,17 @@ String corrente = String(ads.readADC_Differential_2_3() * 2.00000*factor/1000.00
 void setup() {
    Serial.begin(115200);
    //pinMode(SS, OUTPUT);
-  
+
 //
   //setup_wifi();
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+  // client.setServer(mqtt_server, 1883);
+  // client.setCallback(callback);
   delay(1000);
 
    ads.setGain(GAIN_TWOTHIRDS);
 
    ads.begin();
-      // rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+      rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
      // Initialize RTC
      if (! rtc.begin()) { // SE O RTC NÃO FOR INICIALIZADO, FAZ
        Serial.println("DS1307 não encontrado"); //IMPRIME O TEXTO NO MONITOR SERIAL
@@ -350,11 +350,11 @@ void setup() {
        Serial.println("DS1307 rodando!"); //IMPRIME O TEXTO NO MONITOR SERIAL
        //REMOVA O COMENTÁRIO DE UMA DAS LINHAS ABAIXO PARA INSERIR AS INFORMAÇÕES ATUALIZADAS EM SEU RTC
        //rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); //CAPTURA A DATA E HORA EM QUE O SKETCH É COMPILADO
-       //rtc.adjust(DateTime(2018, 8, 29, 17, 35, 00)); //(ANO), (MÊS), (DIA), (HORA), (MINUTOS), (SEGUNDOS)
+       //rtc.adjust(DateTime(2019, 2, 6, 17, 35, 00)); //(ANO), (MÊS), (DIA), (HORA), (MINUTOS), (SEGUNDOS)
      }
 
 
-      if(!SD.begin(17)){
+      if(!SD.begin()){
           Serial.println("Card Mount Failed");
           return;
       }
@@ -388,7 +388,7 @@ void setup() {
       path += year;
       path += ".csv";
 
-      appendFile(SD, path.c_str(), "DIA/MES/ANO HORA:MINUTO:SEGUNDO |  TENSÃO | CORRENTE \n");
+      appendFile(SD, path.c_str(), " HORA:MINUTO:SEGUNDO |  TENSAO | CORRENTE \n");
       anterior = seconds;
       minutoanterior = minutes;
 
@@ -418,7 +418,7 @@ if (seconds !=  anterior){
     path += ".csv";
 
     if (hour ==0 && minutes == 0 && seconds == 0 ){
-      writeFile(SD, path.c_str(), "DIA/MES/ANO HORA:MINUTO:SEGUNDO |  TENSÃO | CORRENTE \n");
+      writeFile(SD, path.c_str(), "HORA:MINUTO:SEGUNDO |  TENSAO | CORRENTE \n");
     }
     appendFile(SD, path.c_str(), data.c_str());
 

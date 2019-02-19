@@ -1,0 +1,4 @@
+/home/cesar/Documentos/Weather-Station-MPP/PAINEIS/ESP32_DATALOGGER/src/main.cpp:7:10: fatal error: Arduino.h: Arquivo ou diretório inexistente
+ #include <Arduino.h>
+          ^~~~~~~~~~~
+compilation terminated.
