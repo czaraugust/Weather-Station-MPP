@@ -311,7 +311,7 @@ void testFileIO(fs::FS &fs, const char * path){
 
 
 String getData(){
-String  tensao =   String(ads.readADC_Differential_0_1() * 200.00000*factor/1000.00000,5);
+String  tensao =   String(ads.readADC_Differential_0_1() * 250.00000*factor/1000.00000,5);
 String corrente = String(ads.readADC_Differential_2_3() * 2.00000*factor/1000.00000,5);
 
 
@@ -384,8 +384,6 @@ void setup() {
       path += day;
       path += "_";
       path += month;
-      path += "_";
-      path += year;
       path += ".csv";
 
       appendFile(SD, path.c_str(), " HORA:MINUTO:SEGUNDO |  TENSAO | CORRENTE \n");
